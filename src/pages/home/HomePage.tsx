@@ -13,7 +13,8 @@ import { RootState } from '../../redux/store'
 import { 
   fetchRecommendProductStartActionCreator,
   fetchRecommendProductSuccessActionCreator,
-  fetchRecommendProductFailActionCreator
+  fetchRecommendProductFailActionCreator,
+  giveMeDataActionCreator
  } from '../../redux/recommendProducts/recommendProductsActions'
 
 // interface State {
@@ -31,15 +32,18 @@ const mapStateToProps = (state: RootState)=> {
 }
 const mapDispatchToProps = (dispatch: any) => {
   return {
-    fetchStart: () => {
-      dispatch(fetchRecommendProductStartActionCreator())
+    giveMeData: () => {
+      dispatch(giveMeDataActionCreator())
     },
-    fetchSuccess: (data) => {
-      dispatch(fetchRecommendProductSuccessActionCreator(data))
-    },
-    fetchFail: (error) => {
-      dispatch(fetchRecommendProductFailActionCreator(error))
-    }
+    // fetchStart: () => {
+    //   dispatch(fetchRecommendProductStartActionCreator())
+    // },
+    // fetchSuccess: (data) => {
+    //   dispatch(fetchRecommendProductSuccessActionCreator(data))
+    // },
+    // fetchFail: (error) => {
+    //   dispatch(fetchRecommendProductFailActionCreator(error))
+    // }
   }
 }
 
@@ -60,6 +64,12 @@ class HomePageComponent  extends React.Component<PropsType> {
   // }
 
   async componentDidMount() {
+
+    // 使用store调用异步数据
+    this.props.giveMeData()
+
+
+    /* 不使用store获取异步数据
     this.props.fetchStart()
     try {
       const {data} = await axios.get("http://123.56.149.216:8080/api/productCollections")
@@ -75,6 +85,7 @@ class HomePageComponent  extends React.Component<PropsType> {
       //   loading: false
       // })
     }
+    */
   }
 
   render() {
