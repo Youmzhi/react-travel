@@ -16,6 +16,7 @@ import {
   fetchRecommendProductFailActionCreator,
   giveMeDataActionCreator
  } from '../../redux/recommendProducts/recommendProductsActions'
+import { MainLayout } from "../../layouts/mainLayout";
 
 // interface State {
 //   loading: boolean;
@@ -109,8 +110,7 @@ class HomePageComponent  extends React.Component<PropsType> {
     }
 
     return (
-      <>
-        <Header />
+     <MainLayout>
         <div className={styles['page-content']}>
           <Row style={{ marginTop: 20 }}>
             <Col span={6}>
@@ -149,8 +149,7 @@ class HomePageComponent  extends React.Component<PropsType> {
           </ProductCollection>
           <BusinessPartners />
         </div>
-        <Footer />
-      </>
+      </MainLayout>
     )
   }
 }

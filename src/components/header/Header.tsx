@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import styles from './Header.module.css';
 import logo from '../../assets/logo.svg';
 import { Layout, Typography, Input, Menu, Button, Dropdown } from 'antd'
@@ -9,9 +9,15 @@ import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import { LanguageActionTypes, changeLanguageActionCreator, addLanguageActionCreator } from '../../redux/language/languageActions'
 import { useTranslation } from 'react-i18next'
+import jwtDecode, { JwtPayload as DefaultJwtPayload } from 'jwt-decode';
+import { userSlice } from '../../redux/user/slice';
 
 // import { useSelector } from 'react-redux';
-// import { RootState } from '../../redux/store';
+// import { RootState } from '../../redux/store'; {}
+
+interface JwtPayload extends DefaultJwtPayload {
+  username: string;
+}
 
 export const Header: React.FC = () => {
   const navigate = useNavigate()
@@ -29,6 +35,20 @@ export const Header: React.FC = () => {
   // const dispatch = useDispatch<Dispatch<LanguageActionTypes>>()
   const { t } = useTranslation()
 
+  const jwt = useSelector(s => s.user.token)
+  const [username, setUsername] = useState('')
+
+  const shoppingCartItems = useSelector(s => s.shoppingCart.items)
+  const shoppingCartLoading = useSelector(s => s.shoppingCart.loading)
+
+  useEffect(()=> {
+    if (jwt) {
+      const token = jwtDecode<JwtPayload>(jwt)
+      setUsername(token.username)
+    }
+    
+  }, [jwt])
+
   const menuClickHandler = (e) => {
     console.log(e);
     if(e.key === "new") {
@@ -37,6 +57,11 @@ export const Header: React.FC = () => {
     } else {
       dispatch(changeLanguageActionCreator(e.key))
     }
+  }
+
+  const onLogout = () => {
+    dispatch(userSlice.actions.logOut())
+    navigate('/')
   }
 
   return (
@@ -65,14 +90,30 @@ export const Header: React.FC = () => {
             >
               { language === 'zh' ? '中文' : 'English' }
             </Dropdown.Button>
-            <Button.Group className={styles['button-group']}>
-              <Button onClick={()=>{ navigate('register') }}>
-                {t("header.register")}
-              </Button>
-              <Button onClick={()=>{ navigate('signIn') }}>
-                {t("header.signin")}
-              </Button>
-            </Button.Group>
+
+            {jwt ? (
+              <Button.Group className={styles["button-group"]}>
+                <span>
+                  {t("header.welcome")}
+                  <Typography.Text strong>{username}</Typography.Text>
+                </span>
+                <Button loading={shoppingCartLoading} onClick={()=> { navigate('/shoppingCart') }}>
+                  {t("header.shoppingCart")}{shoppingCartItems.length}
+                </Button>
+                <Button onClick={onLogout}>
+                  {t("header.signOut")}
+                </Button>
+              </Button.Group>
+            ) : (
+              <Button.Group className={styles["button-group"]}>
+                <Button onClick={() => navigate("/register")}>
+                  {t("header.register")}
+                </Button>
+                <Button onClick={() => navigate("/signIn")}>
+                  {t("header.signin")}
+                </Button>
+              </Button.Group>
+            )}
           </div>
         </div>
 
@@ -85,7 +126,8 @@ export const Header: React.FC = () => {
           </span>
           <Input.Search
             placeholder={'请输入旅游目的地、主题、或关键字'} 
-            className={styles['search-input']}         
+            className={styles['search-input']}
+            onSearch={(keywords)=> navigate('/search/' + keywords) }       
           />
         </Layout.Header>
         <Menu mode={"horizontal"} className={styles["main-menu"]}>
